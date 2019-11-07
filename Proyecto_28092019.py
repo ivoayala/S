@@ -26,21 +26,120 @@ hz2=0.0;
 pid=0;
 
 def enviar(opcion):
+	global act, velocidad, apagado, pid;
+	
+	if (opcion==0):
 
+		apagado=1;
+		hz=0;
+	if (opcion==1):
+
+		apagado=0;
 	
 def Btn_mtr_on():
-
+	enviar(1); 
 	
 def Btn_mtr_off():
-
+	enviar(0); 
 	
 def vel(tmr):
-
+	global act, v, velocidad, rpm, hz, apagado, pid, hz2;	
+	ctn=0;
+	filtro=0;
+	filtro2=0;
+	ctn2=0;
+	ctn3=0;
+	flag=0;
+	flag_p=0;
+	control=0.0;
+	while 1:
+	
+		if (GPIO.input(7)==0):
+			if (GPIO.input(11)==1 and flag==0):
+				flag=1;
+			if (GPIO.input(11)==0 and flag==1):
+				ctn=ctn+1;
+				flag=0;
+			flag_p=1;
+			if (ctn>100):
+				rpm=0;
+				rpm2=0;
+				hz=0;
+				hz2=0;
+		if (GPIO.input(7)==1):
+			if (flag_p==1):
+				filtro=ctn+filtro;
+				filtro2=ctn+filtro2;
+				ctn3=ctn3+1;
+				ctn2=ctn2+1;
+				if (ctn2>=20):
+					filtro=filtro/20.0;
+					
+					filtro=(filtro*138.0*4.0)/1000.0;  #244
+					filtro=(1000.0/filtro);
+					hz=filtro;
+					rpm=filtro*60*0.25;				
+					filtro=0;
+					ctn2=0;
+				if (ctn3>=300):
+					filtro2=filtro2/300;
+					filtro2=(filtro2*138.0*4.0)/1000.0;  #244
+					filtro2=(1000.0/filtro2);
+					hz2=filtro2;
+					rpm2=filtro2*60*0.25;				
+					filtro2=0;
+					ctn3=0;
+					print (hz2*60)/4
+				ctn=0;
+				flag_p=0;
+				
+		v=velocidad.get();
+		v=float(v);
+					#print v
+		if (v>rpm):
+			if ((v-rpm)>100):
+				dif=((v-rpm)/2000.00)*0.005
+				control=control+dif;
+			if ((v-rpm)<100):
+				dif=((v-rpm)/2000.00)*0.00001
+				control=control+dif;
+		if (v<rpm):
+			if ((rpm-v)>100):
+				dif=((rpm-v)/2000.00)*0.005
+				control=control-dif;
+			if ((rpm-v)<100):
+				dif=((rpm-v)/2000.00)*0.00001
+				control=control-dif;
+		if (control>=100):
+			control=100;
+		if (control<=0):
+			control=0;
+		pid=100.00-control;
+		#print pid
+		if (apagado==0):
+			
+			act.ChangeDutyCycle(pid);
+		if (apagado==1):
+			pid=0;
+			act.ChangeDutyCycle(100);
+			hz=0;
 		
 
 				
 def sms(tmr):
-	
+	global rpm, hz;	
+	ctn=0;
+	datog= np.array([0]*200);
+	while 1:
+		datog[ctn]=(hz*60)/4;
+		tam=len(datog);
+		line.set_data(range(0,tam), datog)
+		fig.canvas.draw()
+		ctn=ctn+1;
+		if (ctn>199):
+			ctn=0;
+			datog= np.array([0]*200);
+		time.sleep(0.5);	
 		
 			
 def main():
@@ -71,7 +170,6 @@ ax.set_xlim([0, 200])
 Figure.get_tk_widget().place(x=150, y=10)
 ax.grid(which='major',linestyle='-', linewidth='0.5', color='red')
 ax.grid(which='minor',linestyle=':', linewidth='0.5', color='black')
-
 
 main();
 ventana.close()
