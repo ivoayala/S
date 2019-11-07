@@ -84,6 +84,37 @@ global act, v, velocidad, rpm, hz, apagado, pid, hz2;
 					print (hz2*60)/4
 				ctn=0;
 				flag_p=0;
+		v=velocidad.get();
+		v=float(v);
+					#print v
+		if (v>rpm):
+			if ((v-rpm)>100):
+				dif=((v-rpm)/2000.00)*0.005
+				control=control+dif;
+			if ((v-rpm)<100):
+				dif=((v-rpm)/2000.00)*0.00001
+				control=control+dif;
+		if (v<rpm):
+			if ((rpm-v)>100):
+				dif=((rpm-v)/2000.00)*0.005
+				control=control-dif;
+			if ((rpm-v)<100):
+				dif=((rpm-v)/2000.00)*0.00001
+				control=control-dif;
+		if (control>=100):
+			control=100;
+		if (control<=0):
+			control=0;
+		pid=100.00-control;
+		#print pid
+		if (apagado==0):
+			
+			act.ChangeDutyCycle(pid);
+		if (apagado==1):
+			pid=0;
+			act.ChangeDutyCycle(100);
+			hz=0;
+		
 				
 		
 
