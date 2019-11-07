@@ -94,7 +94,31 @@ def sms(tmr):
 			
 def main():
 	thread.start_new_thread(vel,(0.2,));
-	ventana.mainloop()	
+	ventana.mainloop()
+
+ventana = Tkinter.Tk()
+ventana.title("Proyecto Diplomado")
+ventana.geometry("797x443+0+0")
+frame_00 = Frame(ventana, width=697, height=443, bg="#8a8a8a")
+frame_00.place(x=100, y=0)
+frame_00_1 = Frame(frame_00, width=690, height=440, bg="#9a9a9a")
+frame_00_1.place(x=0, y=0)
+btn_00 = Button(frame_00_1, text="Activar MOTOR", command=Btn_mtr_on,width=12,height=1)
+btn_00.place(x=10, y=20)
+btn_01 = Button(frame_00_1, text="Apagar Motor", command=Btn_mtr_off,width=12,height=1)
+btn_01.place(x=10, y=50)
+velocidad = Tkinter.Scale(frame_00_1, from_=3165, to=0, label="V",width=40, length=300, resolution=0.1)
+velocidad.place(x=10, y=100)
+
+fig, ax = plt.subplots(figsize=(5.2, 4))
+plt.ion()
+line, = ax.plot([], [])
+Figure = FigureCanvasTkAgg(fig, master=frame_00)
+ax.set_ylim([0, 5000])
+ax.set_xlim([0, 200])
+Figure.get_tk_widget().place(x=150, y=10)
+ax.grid(which='major',linestyle='-', linewidth='0.5', color='red')
+ax.grid(which='minor',linestyle=':', linewidth='0.5', color='black')
 
 main();
 
